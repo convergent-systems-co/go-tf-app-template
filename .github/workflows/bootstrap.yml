@@ -97,7 +97,16 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm -rf .github/seed-issues
-          git rm    .github/workflows/bootstrap.yml
-          git commit -m "chore: remove bootstrap scaffolding"
-          git push
+          if [ -d ".github/seed-issues" ] || [ -f ".github/workflows/bootstrap.yml" ]; then
+            git rm -rf .github/seed-issues 2>/dev/null || true
+            git rm    .github/workflows/bootstrap.yml 2>/dev/null || true
+            if git status --short | grep -q .; then
+              git commit -m "chore: remove bootstrap scaffolding"
+              git pull --rebase
+              git push
+            else
+              echo "No scaffolding files to remove."
+            fi
+          else
+            echo "Scaffolding already cleaned up."
+          fi
