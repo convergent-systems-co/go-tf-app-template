@@ -4,15 +4,25 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-  issues: write
-  actions: write
-
 jobs:
-  bootstrap:
-    runs-on: ubuntu-latest
+  install-labels:
     if: github.run_number == 1
+    permissions:
+      issues: write
+      contents: read
+    uses: convergent-systems-co/repo-standards/.github/workflows/label-install.yml@v1
+    with:
+      labels-ref: v1
+      delete-others: false
+
+  bootstrap:
+    needs: install-labels
+    if: github.run_number == 1
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,13 +36,7 @@ jobs:
         run: |
           gh api -X PATCH "repos/$REPO" \
             --input - <<< '{"security_and_analysis":{"secret_scanning":{"status":"enabled"},"secret_scanning_push_protection":{"status":"enabled"}}}' \
-            || echo "WARN: secret scanning toggle requires GHAS for private repos — skipping"
-
-      - name: Install labels via repo-standards
-        uses: convergent-systems-co/repo-standards/.github/workflows/label-install.yml@v1
-        with:
-          labels-ref: v1
-          delete-others: false
+            || echo "WARN: secret scanning toggle requires GHAS for private repos or admin perms — skipping"
 
       - name: File seed issues
         env:
