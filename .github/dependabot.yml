@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: "/cmd/app"
+    schedule: { interval: weekly }
+    groups:
+      go-deps:
+        patterns: ["*"]
+  - package-ecosystem: gomod
+    directory: "/internal"
+    schedule: { interval: weekly }
+  - package-ecosystem: gomod
+    directory: "/pkg"
+    schedule: { interval: weekly }
+  - package-ecosystem: terraform
+    directory: "/infra/terraform/envs/dev"
+    schedule: { interval: weekly }
+  - package-ecosystem: terraform
+    directory: "/infra/terraform/envs/stg"
+    schedule: { interval: weekly }
+  - package-ecosystem: terraform
+    directory: "/infra/terraform/envs/prod"
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: weekly }
