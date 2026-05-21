@@ -1,0 +1,29 @@
+# Build artifacts
+dist/
+bin/
+*.exe
+
+# Go
+*.test
+*.out
+go.work.sum
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local secrets
+.env
+.env.local
+*.pem
+*.key
