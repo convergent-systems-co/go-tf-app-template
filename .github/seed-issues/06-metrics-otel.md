@@ -10,7 +10,7 @@ when `OTEL_EXPORTER_OTLP_ENDPOINT` is unset.
 
 ## Acceptance criteria
 
-- [ ] `pkg/telemetry/` exports `Setup(ctx) (shutdown func, error)`
+- [ ] `src/pkg/telemetry/` exports `Setup(ctx) (shutdown func, error)`
 - [ ] At least one application metric and one span are emitted
 - [ ] Four golden signals covered (latency, errors, throughput, saturation) — even with stub values
 - [ ] `OTEL_*` env vars documented in README

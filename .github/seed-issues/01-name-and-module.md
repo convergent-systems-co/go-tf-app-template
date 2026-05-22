@@ -10,7 +10,7 @@ path (`github.com/convergent-systems-co/{{REPO_NAME}}/...`). Replace it.
 
 ## Acceptance criteria
 
-- [ ] `cmd/app/go.mod`, `internal/go.mod`, `pkg/go.mod` use the real module path
-- [ ] `cmd/app/main.go`'s "hello from" string is updated
+- [ ] `src/cmd/app/go.mod`, `src/internal/go.mod`, `src/pkg/go.mod` use the real module path
+- [ ] `src/cmd/app/main.go`'s "hello from" string is updated
 - [ ] `go work sync && go build ./...` succeeds
 - [ ] README has the project's real name in the H1

@@ -10,7 +10,7 @@ output; text in tty. Include a request-scoped logger that flows via context.
 
 ## Acceptance criteria
 
-- [ ] `pkg/log/` provides a constructor returning a `*slog.Logger`
-- [ ] `internal/middleware/` (or equivalent) injects the logger into request context
+- [ ] `src/pkg/log/` provides a constructor returning a `*slog.Logger`
+- [ ] `src/internal/middleware/` (or equivalent) injects the logger into request context
 - [ ] No bare `fmt.Println` / `log.Println` in production paths
 - [ ] At least one unit test exercises log output via `slog.NewTextHandler`
