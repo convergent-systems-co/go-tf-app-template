@@ -21,5 +21,8 @@ func main() {
 func run(ctx context.Context) error {
 	fmt.Println("hello from go-tf-app-template")
 	<-ctx.Done()
+	if err := ctx.Err(); err != nil && err != context.Canceled {
+		return err
+	}
 	return nil
 }
