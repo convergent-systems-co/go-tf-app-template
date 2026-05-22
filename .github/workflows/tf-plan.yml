@@ -4,6 +4,9 @@ on:
   pull_request:
     paths: ["infra/terraform/**"]
 
+permissions:
+  contents: read
+
 jobs:
   plan:
     runs-on: ubuntu-latest
