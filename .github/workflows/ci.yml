@@ -29,7 +29,13 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - run: go work sync
-      - run: go test ./src/... -race -cover
+      - name: Test (workspace modules)
+        shell: bash
+        run: |
+          set -euo pipefail
+          go list -m -f '{{.Dir}}' | while IFS= read -r dir; do
+            ( cd "$dir" && go test ./... -race -cover )
+          done
 
   build:
     runs-on: ubuntu-latest
