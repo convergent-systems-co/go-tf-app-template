@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -14,9 +17,10 @@ jobs:
         with:
           go-version: "1.22"
       - run: go work sync
-      - uses: golangci/golangci-lint-action@v6
+      - uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
+          # v9 ships golangci-lint v2.x; matches the v2 schema in .golangci.yml.
+          version: v2.12.2
 
   test:
     runs-on: ubuntu-latest
@@ -29,7 +33,7 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - run: go work sync
-      - run: go test ./... -race -cover
+      - run: go test ./src/cmd/app/... ./src/internal/... ./src/pkg/... -race -cover
 
   build:
     runs-on: ubuntu-latest
