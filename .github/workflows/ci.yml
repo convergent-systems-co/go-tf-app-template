@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -29,7 +32,7 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - run: go work sync
-      - run: go test ./... -race -cover
+      - run: go test ./src/cmd/app/... ./src/internal/... ./src/pkg/... -race -cover
 
   build:
     runs-on: ubuntu-latest
