@@ -3,11 +3,11 @@ version: 2
 before:
   hooks:
     - go work sync
-    - go mod tidy -C ./cmd/app
+    - go mod tidy -C ./src/cmd/app
 
 builds:
   - id: app
-    main: ./cmd/app
+    main: ./src/cmd/app
     binary: app
     env: [CGO_ENABLED=0]
     flags: [-trimpath]

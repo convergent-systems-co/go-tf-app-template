@@ -7,7 +7,8 @@ GitHub template repository for Go + Terraform projects in the
 
 ## What you get
 
-- Go workspace skeleton (`cmd/app`, `internal`, `pkg`, `plugins`)
+- Go workspace skeleton under `src/` (`src/cmd/app`, `src/internal`, `src/pkg`, `src/plugins`)
+- Front-end site convention under `web/<site-name>/` (Astro default; see `web/README.md`)
 - Terraform infra layout (`modules/`, `envs/dev/stg/prod`)
 - Multi-stage distroless Dockerfile
 - Goreleaser config (cross-platform builds + SPDX SBOM via syft)
