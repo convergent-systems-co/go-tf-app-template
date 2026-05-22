@@ -33,8 +33,14 @@ fmt: ## Run gofmt + terraform fmt
 	gofmt -s -w .
 	terraform fmt -recursive infra/
 
-tidy: ## go mod tidy across the workspace
+tidy: ## go work sync + go mod tidy per workspace module
 	$(GO) work sync
+	@set -e; \
+	$(GO) list -m -f '{{.Dir}}' | while IFS= read -r dir; do \
+		if (cd "$$dir" && $(GO) list ./... 2>/dev/null | grep -q .); then \
+			(cd "$$dir" && $(GO) mod tidy); \
+		fi; \
+	done
 
 tf-init: ## Init the selected TF env
 	cd infra/terraform/envs/$(ENV) && terraform init
