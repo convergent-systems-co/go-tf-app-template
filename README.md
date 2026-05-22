@@ -12,7 +12,7 @@ GitHub template repository for Go + Terraform projects in the
 - Terraform infra layout (`modules/`, `envs/dev/stg/prod`)
 - Multi-stage distroless Dockerfile
 - Goreleaser config (cross-platform builds + SPDX SBOM via syft)
-- GitHub Actions: CI (lint/test/build), TF plan, secret scan (gitleaks), release
+- GitHub Actions: CI (lint/test/build), TF plan, secret scan (trufflehog), release
 - Structured issue templates (bug / feature / RFC / chore)
 - 11 seed issues filed automatically on first push
 - 28-label org standard installed automatically
