@@ -13,11 +13,21 @@ build: ## Build the binary into dist/
 	mkdir -p dist
 	$(GO) build $(GOFLAGS) -o dist/$(APP) ./src/cmd/$(APP)
 
-test: ## Run unit tests
-	$(GO) test ./... -race
+test: ## Run unit tests across workspace modules
+	@set -e; \
+	$(GO) list -m -f '{{.Dir}}' | while IFS= read -r dir; do \
+		if (cd "$$dir" && $(GO) list ./... 2>/dev/null | grep -q .); then \
+			(cd "$$dir" && $(GO) test ./... -race); \
+		fi; \
+	done
 
-lint: ## Run golangci-lint
-	golangci-lint run
+lint: ## Run golangci-lint across workspace modules
+	@set -e; \
+	$(GO) list -m -f '{{.Dir}}' | while IFS= read -r dir; do \
+		if (cd "$$dir" && $(GO) list ./... 2>/dev/null | grep -q .); then \
+			(cd "$$dir" && golangci-lint run); \
+		fi; \
+	done
 
 fmt: ## Run gofmt + terraform fmt
 	gofmt -s -w .
