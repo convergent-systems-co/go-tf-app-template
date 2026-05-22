@@ -6,7 +6,8 @@ on:
 
 jobs:
   install-labels:
-    if: github.run_number == 1
+    # Fire only on a fresh template *use*, never on the template repo itself.
+    if: github.run_number == 1 && github.event.repository.is_template != true
     permissions:
       issues: write
       contents: read
@@ -17,7 +18,8 @@ jobs:
 
   bootstrap:
     needs: install-labels
-    if: github.run_number == 1
+    # Fire only on a fresh template *use*, never on the template repo itself.
+    if: github.run_number == 1 && github.event.repository.is_template != true
     runs-on: ubuntu-latest
     permissions:
       contents: write
