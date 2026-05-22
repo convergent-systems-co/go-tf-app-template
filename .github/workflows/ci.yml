@@ -27,7 +27,7 @@ jobs:
             fi
           done < <(go list -m -f '{{.Dir}}')
           echo "args=${targets% }" >> "$GITHUB_OUTPUT"
-      - uses: golangci/golangci-lint-action@v8
+      - uses: golangci/golangci-lint-action@v9
         with:
           version: v2.12.2
           args: ${{ steps.targets.outputs.args }}
