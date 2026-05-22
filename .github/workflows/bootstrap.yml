@@ -55,58 +55,79 @@ jobs:
             exit 0
           fi
 
+          # Collect titles for the welcome message bullets while we file each issue.
+          titles=()
           for f in "${seed_files[@]}"; do
             front=$(awk '/^---$/{n++; next} n==1' "$f")
             body=$(awk '/^---$/{n++; next} n==2' "$f")
-            title=$(echo "$front"  | grep -E '^title:'  | sed -E 's/^title: *"?(.*)"?$/\1/')
+            # Two-step parse: strip wrapping quotes when present, then handle unquoted form.
+            title=$(echo "$front"  | grep -E '^title:'  | sed -E 's/^title: *"([^"]*)"$/\1/; s/^title: *([^"][^"]*)$/\1/')
             labels=$(echo "$front" | grep -E '^labels:' | sed -E 's/^labels: *\[(.+)\]$/\1/' | tr -d '"' | tr -d ' ')
 
+            titles+=("$title")
             gh issue create --repo "$REPO" \
               --title "$title" \
               --body  "$body" \
               --label "$labels"
           done
 
-          welcome=$(cat <<'WELCOME'
-          # Welcome to this repo
+          # Build the welcome body dynamically from what we actually filed.
+          # Per-template constant: name of the upstream template this repo was bootstrapped from.
+          source_repo="convergent-systems-co/go-tf-app-template"
+          {
+            printf '# Welcome to this repo\n\n'
+            printf 'Bootstrapped from [`%s`](https://github.com/%s).\n\n' "$source_repo" "$source_repo"
+            printf '%d seed issues have been filed. Resolve in order — issue #1 asks you to confirm or switch the default AGPL-3.0 license:\n\n' "${#titles[@]}"
+            for t in "${titles[@]}"; do
+              printf -- '- [ ] %s\n' "$t"
+            done
+            printf '\nTriage and label cleanup run automatically via reusable workflows from [`repo-standards@v1`](https://github.com/convergent-systems-co/repo-standards/tree/v1).\n'
+          } > /tmp/welcome.md
 
-          Bootstrapped from [`convergent-systems-co/go-tf-app-template`](https://github.com/convergent-systems-co/go-tf-app-template).
-
-          11 seed issues have been filed. Resolve in order — issue #1 asks you to confirm or switch the default AGPL-3.0 license:
-
-          - [ ] Choose your license (default: AGPL-3.0)
-          - [ ] Set application name and Go module path
-          - [ ] Wire CI: lint + test + build matrix
-          - [ ] Initialize Terraform remote state backend
-          - [ ] Define minimum-viable infra (network + IAM)
-          - [ ] Add structured logging (slog) with context
-          - [ ] Add metrics + tracing (OpenTelemetry exporter)
-          - [ ] Review Dependabot config; enable security updates
-          - [ ] Fill CODEOWNERS for /, /infra, /.github
-          - [ ] Replace SECURITY.md stub with real policy + key
-          - [ ] Cut v0.1.0 release with goreleaser config
-
-          Triage and label cleanup run automatically via reusable workflows from [`repo-standards@v1`](https://github.com/convergent-systems-co/repo-standards/tree/v1).
-          WELCOME
-          )
-          gh issue create --repo "$REPO" --title "Welcome to ${REPO##*/}" --body "$welcome" --label "kind/docs,area/core,priority/low"
+          gh issue create --repo "$REPO" --title "Welcome to ${REPO##*/}" --body-file /tmp/welcome.md --label "kind/docs,area/core,priority/low"
 
       - name: Self-cleanup commit
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
+          set -e
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -d ".github/seed-issues" ] || [ -f ".github/workflows/bootstrap.yml" ]; then
-            git rm -rf .github/seed-issues 2>/dev/null || true
-            git rm    .github/workflows/bootstrap.yml 2>/dev/null || true
-            if git status --short | grep -q .; then
-              git commit -m "chore: remove bootstrap scaffolding"
-              git pull --rebase
-              git push
-            else
-              echo "No scaffolding files to remove."
-            fi
-          else
+
+          if [ ! -d ".github/seed-issues" ] && [ ! -f ".github/workflows/bootstrap.yml" ]; then
             echo "Scaffolding already cleaned up."
+            exit 0
           fi
+
+          git rm -rf .github/seed-issues 2>/dev/null || true
+          git rm    .github/workflows/bootstrap.yml 2>/dev/null || true
+
+          if ! git status --short | grep -q .; then
+            echo "No scaffolding files to remove."
+            exit 0
+          fi
+
+          git commit -m "chore: remove bootstrap scaffolding"
+          git pull --rebase origin main
+
+          # Try direct push first; if branch protection blocks it, open a PR.
+          if git push origin HEAD:main 2>/tmp/push.err; then
+            echo "Pushed cleanup directly to main."
+            exit 0
+          fi
+
+          if ! grep -qE "(protected branch|repository rule|push declined)" /tmp/push.err; then
+            cat /tmp/push.err >&2
+            echo "Unexpected push failure (not branch-protection related)." >&2
+            exit 1
+          fi
+
+          echo "Direct push blocked by branch protection — opening a PR instead."
+          branch="bootstrap/remove-scaffolding"
+          git push origin "HEAD:$branch"
+          gh pr create --repo "$REPO" \
+            --base main --head "$branch" \
+            --title "chore: remove bootstrap scaffolding" \
+            --body "Automated cleanup PR opened by the one-shot bootstrap workflow. Direct push to \`main\` was blocked by branch protection, so the scaffolding removal is going through review here. Merge to complete the bootstrap." \
+            --label "kind/chore,area/ci,priority/high"
