@@ -11,7 +11,7 @@ help: ## Show this help
 
 build: ## Build the binary into dist/
 	mkdir -p dist
-	$(GO) build $(GOFLAGS) -o dist/$(APP) ./cmd/$(APP)
+	$(GO) build $(GOFLAGS) -o dist/$(APP) ./src/cmd/$(APP)
 
 test: ## Run unit tests
 	$(GO) test ./... -race

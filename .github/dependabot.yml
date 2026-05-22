@@ -1,16 +1,16 @@
 version: 2
 updates:
   - package-ecosystem: gomod
-    directory: "/cmd/app"
+    directory: "/src/cmd/app"
     schedule: { interval: weekly }
     groups:
       go-deps:
         patterns: ["*"]
   - package-ecosystem: gomod
-    directory: "/internal"
+    directory: "/src/internal"
     schedule: { interval: weekly }
   - package-ecosystem: gomod
-    directory: "/pkg"
+    directory: "/src/pkg"
     schedule: { interval: weekly }
   - package-ecosystem: terraform
     directory: "/infra/terraform/envs/dev"
